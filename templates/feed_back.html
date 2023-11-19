@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback and Classification</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@500&display=swap');
+        body {
+            font-family: 'Ubuntu', sans-serif;
+            background-image: url('static/inside.webp');
+            background-size: cover;
+            background-position: center;
+            backdrop-filter: blur(5px);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-position: no-repeat;
+        }
+
+        #title-container {
+            width: 100%;
+            border-bottom: 3px solid #080808;
+            padding: 10px;
+            text-align: center;
+            background-color: #00000091;
+            color: rgb(224, 224, 224);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000; /* Ensure it is on top of other elements */
+        }
+
+        table {
+            margin-top: 50px;
+            width: 90%;
+            border-collapse: collapse;
+            margin-top: 5px; /* Increase top margin to prevent overlap */
+            background-color: rgba(255, 255, 255, 0.585);
+            overflow-x: auto;
+            
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 3px;
+            text-align: center;
+        }
+
+
+        th {
+            background-color: #00000091;
+            color: white;
+        }
+
+        .container {
+            margin-top: 30px;
+        }
+
+        .button_back {
+            margin-top: 80px;
+            margin-right: 100px;
+            
+        }
+
+        .button_back .back-btn {
+            background-color: rgb(11, 219, 219);
+            color: white;
+            padding: 5px 40px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 1150px;
+        }
+
+        .button_back .back-btn:hover {
+            background-color: #0a8c8c;
+        }
+
+        #loading-indicator {
+            display: none;
+            margin-top: 20px;
+            color: white;
+            text-align: center;
+            font-size: 20px;
+        
+        }
+
+        #footer {
+            background-color: #000000f2;
+            border-top: 2px solid #363535;
+            text-align: center;
+            padding: 20px;
+            color: #fff;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+    </style>
+    <script>
+        function getDataFromGoogleAppsScript() {
+            // Show loading indicator
+            document.getElementById('loading-indicator').style.display = 'block';
+
+            var scriptUrl = 'https://script.google.com/macros/s/AKfycbxs5ugZ3lA7CQQJwR-fS5T2pjGBKGupuQqzDQor-ZtVRa4X9aKgHX0CTCbBYhOKpekz/exec';
+
+            fetch(scriptUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json(); // Parse the JSON string
+                })
+                .then(jsonResponse => {
+                    // Extract the 'body' property from the JSON response
+                    var responseBody = jsonResponse.body;
+                    
+                    try {
+                        // Attempt to parse the JSON string in the 'body' property into an array
+                        var data = JSON.parse(responseBody);
+
+                        if (Array.isArray(data) && data.length > 0) {
+                            // 'data' contains the retrieved data from Google Sheets
+                            displayDataInTable(data);
+                        } else {
+                            console.error('Invalid data received from the server.');
+                        }
+                    } catch (error) {
+                        console.error('Error parsing JSON:', error);
+                    } finally {
+                        // Hide loading indicator
+                        document.getElementById('loading-indicator').style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Hide loading indicator in case of an error
+                    document.getElementById('loading-indicator').style.display = 'none';
+                });
+        }
+
+        function displayDataInTable(data) {
+            // Check if the table already exists and remove it
+            var existingTable = document.querySelector('table');
+            if (existingTable) {
+                existingTable.remove();
+            }
+
+            var table = document.createElement('table');
+            var thead = table.createTHead();
+            var tbody = table.createTBody();
+
+            // Create table header
+            var headerRow = thead.insertRow();
+            data[0].forEach(header => {
+                var th = document.createElement('th');
+                th.textContent = header;
+                headerRow.appendChild(th);
+            });
+
+            // Create table rows and cells
+            for (var i = 1; i < data.length; i++) {
+                var row = tbody.insertRow();
+                data[i].forEach((value, index) => {
+                    var cell = row.insertCell();
+                    // Format timestamp values by removing ".000Z"
+                    cell.textContent = index === 1 ? value.replace(".000Z", "") : value;
+                });
+            }
+
+            // Append the table to the body of the document
+            document.body.appendChild(table);
+        }
+
+        // Call the function when the page is loaded
+        window.onload = getDataFromGoogleAppsScript;
+    </script>
+</head>
+<body>
+    <div id="title-container">
+        <h2>Feedback and Classification</h2>
+    </div>
+    <div class="button_back">
+        <form action="/home" method="get">
+            <button type="submit" class="back-btn">Back</button>
+        </form>
+    </div>
+    <div id="loading-indicator">Loading...</div>
+</body>
+</html>
