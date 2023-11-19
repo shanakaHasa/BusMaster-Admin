@@ -55,7 +55,7 @@ def download_json_from_firebase_time():
 def index():
     return render_template('login.html')
 @app.route('/home')
-def index():
+def home():
     return render_template('home.html')
 
 @app.route('/admin_panel')
